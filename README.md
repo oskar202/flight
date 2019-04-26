@@ -1,18 +1,19 @@
 ## Swagger UI
 http://localhost:8080/swagger-ui.html#/
 #
-#####HTTP API endpoint that takes as input two IATA airport codes and provides as output a route between these two airports
-https://openflights.org/data.html <- origin of routes and airports
+* HTTP API endpoint that takes as input two IATA airport codes and provides as output a route between these two airports
+
+* https://openflights.org/data.html <- origin of routes and airports
 
 * Request example:
-
+```json
 {
   "end": "MAD",
   "start": "TLL"
 }
-
+```
 * Response example:
-
+```json
 {
   "path": [
     {
@@ -34,5 +35,5 @@ https://openflights.org/data.html <- origin of routes and airports
     "[TLL, FRA, TOJ]": 2880.436131269422
   }
 }
-
+```
 Alternative routes have different final airport within 100 km.
