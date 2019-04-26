@@ -1,6 +1,6 @@
 package com.sixfold.flight.service;
 
-import com.sixfold.flight.BusinessException;
+import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.controller.FlightResponseDto;
 import com.sixfold.flight.entity.Airport;
 import com.sixfold.flight.entity.Route;

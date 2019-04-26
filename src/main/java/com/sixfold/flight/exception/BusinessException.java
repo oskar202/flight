@@ -1,4 +1,4 @@
-package com.sixfold.flight;
+package com.sixfold.flight.exception;
 
 public class BusinessException extends RuntimeException {
 

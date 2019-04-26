@@ -1,6 +1,6 @@
 package com.sixfold.flight.service;
 
-import com.sixfold.flight.BusinessException;
+import com.sixfold.flight.exception.BusinessException;
 
 import java.util.*;
 import java.util.stream.Collectors;
