@@ -1,6 +1,10 @@
 ## Swagger UI
 http://localhost:8080/swagger-ui.html#/
 #
+Prerequierments:
+* OpenJDK 11
+* Lombok- Enable annotation processing
+#
 * HTTP API endpoint that takes as input two IATA airport codes and provides as output a route between these two airports
 
 * https://openflights.org/data.html <- origin of routes and airports
