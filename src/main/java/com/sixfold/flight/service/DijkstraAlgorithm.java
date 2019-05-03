@@ -58,7 +58,13 @@ class DijkstraAlgorithm {
     }
 
     private Vertex getMinimum(Set<Vertex> vertexes) {
-        return vertexes.stream().min(Comparator.comparingDouble(this::getShortestDistance)).orElse(null);
+        Vertex minimum = null;
+        for (Vertex vertex : vertexes) {
+            if (minimum == null || getShortestDistance(vertex) < getShortestDistance(minimum)) {
+                minimum = vertex;
+            }
+        }
+        return minimum;
     }
 
     private boolean isSettled(Vertex vertex) {

@@ -1,9 +1,9 @@
 package com.sixfold.flight.service;
 
-import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.controller.FlightResponseDto;
 import com.sixfold.flight.entity.Airport;
 import com.sixfold.flight.entity.Route;
+import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.repository.AirportRepository;
 import com.sixfold.flight.repository.RouteRepository;
 import org.springframework.stereotype.Service;
@@ -74,7 +74,7 @@ public class FlightService {
                 .sum();
     }
 
-    private  Map<LinkedList<Vertex>, Double> findAlternativePaths(List<Airport> allAirports, String end, LinkedList<Vertex> path){
+    private Map<LinkedList<Vertex>, Double> findAlternativePaths(List<Airport> allAirports, String end, LinkedList<Vertex> path) {
         Map<LinkedList<Vertex>, Double> alternativePaths = new HashMap<>();
 
         allAirports.forEach(airport -> {

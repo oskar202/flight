@@ -49,7 +49,7 @@ public class FlightServiceTest {
     }
 
     @Test
-    public void dijkstraAlgorithm() {
+    public void findShortestPath_success() {
         AirportRepository airportRepository = new AirportRepository();
         RouteRepository routeRepository = new RouteRepository();
         FlightService flightService = new FlightService(routeRepository, airportRepository);
