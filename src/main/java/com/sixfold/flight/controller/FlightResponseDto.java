@@ -10,7 +10,7 @@ import java.util.Map;
 public class FlightResponseDto {
     private final LinkedList<Vertex> path;
     private final double distance;
-    private final Map<LinkedList<Vertex>,Double> alternativePaths;
+    private final Map<LinkedList<Vertex>, Double> alternativePaths;
 
 
     public FlightResponseDto(LinkedList<Vertex> path, double distance, Map<LinkedList<Vertex>, Double> alternativePaths) {

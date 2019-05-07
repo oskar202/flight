@@ -6,12 +6,14 @@ import com.sixfold.flight.entity.Route;
 import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.repository.AirportRepository;
 import com.sixfold.flight.repository.RouteRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 @Service
+@Slf4j
 public class FlightService {
     private RouteRepository routeRepository;
     private AirportRepository airportRepository;
@@ -22,6 +24,7 @@ public class FlightService {
     }
 
     public FlightResponseDto findShortestRoute(String start, String end) {
+        log.info("Started calculating shortest route");
         Set<Route> uniqueRoutes = routeRepository.getAllUniqueRoutes();
         List<Route> allRoutes = routeRepository.getAllRoutes();
 
@@ -32,7 +35,7 @@ public class FlightService {
                 .map(uniqueRoute -> new Vertex(String.valueOf(uniqueRoute.getSourceAirportIata()), uniqueRoute.getSourceAirportIata()))
                 .forEach(nodes::add);
 
-        for (Route route : allRoutes) {
+        allRoutes.forEach(route -> {
             route.setDistance(distanceInKilometers(route.getSourceAirportIata(), route.getDestinationAirportIata()));
             if (route.getDistance() > 0) {
                 edges.add(new Edge(String.valueOf(allRoutes.indexOf(route)),
@@ -40,19 +43,20 @@ public class FlightService {
                         nodes.stream().filter(s -> s.getName().equals(route.getDestinationAirportIata())).findFirst().orElse(null),
                         route.getDistance()));
             }
-        }
+        });
 
         Vertex vertexStart = getVertexByIata(nodes, start);
         Vertex vertexEnd = getVertexByIata(nodes, end);
 
         Graph graph = new Graph(nodes, edges);
         DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph);
+        log.info("Executing dijkstra algorithm");
         dijkstra.execute(vertexStart);
         LinkedList<Vertex> path = dijkstra.getPath(vertexEnd);
 
         validateResultPath(path);
         List<Airport> allAirports = airportRepository.getAllAirports();
-
+        log.info("Returning shortest path");
         return new FlightResponseDto(path, calculateTotalDistance(path), findAlternativePaths(allAirports, end, path));
     }
 
