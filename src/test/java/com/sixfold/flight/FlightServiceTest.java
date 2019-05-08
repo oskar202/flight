@@ -37,8 +37,8 @@ public class FlightServiceTest {
         rigaAirport.setLongitude(24.105186);
 
         LinkedList<Vertex> path = new LinkedList<Vertex>();
-        path.add(new Vertex("TLL", "TLL"));
-        path.add(new Vertex("RIX", "RIX"));
+        path.add(new Vertex("TLL"));
+        path.add(new Vertex("RIX"));
 
         when(airportRepository.getAirportByIata("TLL")).thenReturn(tallinnAirport);
         when(airportRepository.getAirportByIata("RIX")).thenReturn(rigaAirport);
@@ -51,7 +51,7 @@ public class FlightServiceTest {
     @Test
     public void findShortestPath_success() {
         AirportRepository airportRepository = new AirportRepository();
-        RouteRepository routeRepository = new RouteRepository();
+        RouteRepository routeRepository = new RouteRepository(airportRepository);
         FlightService flightService = new FlightService(routeRepository, airportRepository);
 
         FlightResponseDto flightResponseDto = flightService.findShortestRoute("TLL", "MAD");
@@ -64,7 +64,7 @@ public class FlightServiceTest {
         expected.expect(BusinessException.class);
         expected.expectMessage("Route or airport does not exist");
         AirportRepository airportRepository = new AirportRepository();
-        RouteRepository routeRepository = new RouteRepository();
+        RouteRepository routeRepository = new RouteRepository(airportRepository);
         FlightService flightService = new FlightService(routeRepository, airportRepository);
 
         flightService.findShortestRoute("TLL", "NON");
@@ -75,7 +75,7 @@ public class FlightServiceTest {
         expected.expect(BusinessException.class);
         expected.expectMessage("Route is too long: 6");
         AirportRepository airportRepository = new AirportRepository();
-        RouteRepository routeRepository = new RouteRepository();
+        RouteRepository routeRepository = new RouteRepository(airportRepository);
         FlightService flightService = new FlightService(routeRepository, airportRepository);
 
         flightService.findShortestRoute("TLL", "ACV");

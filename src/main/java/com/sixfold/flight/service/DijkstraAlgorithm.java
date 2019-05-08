@@ -1,9 +1,8 @@
 package com.sixfold.flight.service;
 
-import com.sixfold.flight.exception.BusinessException;
+import com.sixfold.flight.repository.AirportRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 class DijkstraAlgorithm {
     private final List<Edge> edges;
@@ -32,29 +31,28 @@ class DijkstraAlgorithm {
     }
 
     private void findMinimalDistances(Vertex node) {
-        List<Vertex> adjacentNodes = getNeighbors(node);
-        adjacentNodes.stream().filter(target -> getShortestDistance(target) > getShortestDistance(node)
-                + getDistance(node, target)).forEach(target -> {
-            distance.put(target, getShortestDistance(node) + getDistance(node, target));
-            predecessors.put(target, node);
-            unSettledNodes.add(target);
+        Map<Vertex, Double> adjacentNodes = getNeighbors(node);
+        adjacentNodes.forEach((target, weight) -> {
+            if (weight > 0) {
+                double newDistance = getShortestDistance(node) + weight;
+                if (getShortestDistance(target) > newDistance) {
+                    distance.put(target, newDistance);
+                    predecessors.put(target, node);
+                    unSettledNodes.add(target);
+                }
+            }
         });
-
     }
 
-    private double getDistance(Vertex node, Vertex target) {
+    private Map<Vertex, Double> getNeighbors(Vertex node) {
+        Map<Vertex, Double> list = new HashMap<>();
         for (Edge edge : edges) {
-            if (edge.getSource().equals(node)
-                    && edge.getDestination().equals(target)) {
-                return edge.getWeight();
+            if (edge.getSource().equals(node) && !isSettled(edge.getDestination())) {
+                Vertex destination = edge.getDestination();
+                list.put(destination, edge.getWeight());
             }
         }
-        throw new BusinessException("Destination airport might be null");
-    }
-
-    private List<Vertex> getNeighbors(Vertex node) {
-        return edges.stream().filter(edge -> edge.getSource().equals(node)
-                && !isSettled(edge.getDestination())).map(Edge::getDestination).collect(Collectors.toList());
+        return list;
     }
 
     private Vertex getMinimum(Set<Vertex> vertexes) {

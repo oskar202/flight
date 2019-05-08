@@ -4,11 +4,13 @@ import lombok.Data;
 
 @Data
 public class Vertex {
-    private String id;
-    private String name;
+    final private String name;
 
-    public Vertex(String id, String name) {
-        this.id = id;
+    public Vertex(String name) {
         this.name = name;
+    }
+    @Override
+    public String toString() {
+        return name;
     }
 }

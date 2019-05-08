@@ -2,7 +2,6 @@ package com.sixfold.flight.service;
 
 import com.sixfold.flight.controller.FlightResponseDto;
 import com.sixfold.flight.entity.Airport;
-import com.sixfold.flight.entity.Route;
 import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.repository.AirportRepository;
 import com.sixfold.flight.repository.RouteRepository;
@@ -10,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -24,26 +24,17 @@ public class FlightService {
     }
 
     public FlightResponseDto findShortestRoute(String start, String end) {
-        log.info("Started calculating shortest route");
-        Set<Route> uniqueRoutes = routeRepository.getAllUniqueRoutes();
-        List<Route> allRoutes = routeRepository.getAllRoutes();
-
+        List<Edge> edges = routeRepository.getAllRoutes(start);
         List<Vertex> nodes = new ArrayList<>();
-        List<Edge> edges = new ArrayList<>();
 
-        uniqueRoutes.stream()
-                .map(uniqueRoute -> new Vertex(String.valueOf(uniqueRoute.getSourceAirportIata()), uniqueRoute.getSourceAirportIata()))
+        Set<Vertex> destination = edges.stream()
+                .map(u -> u.getDestination().getName())
+                .map(Vertex::new)
+                .collect(Collectors.toSet());
+
+        destination.stream()
+                .map(uniqueRoute -> new Vertex(String.valueOf(uniqueRoute.getName())))
                 .forEach(nodes::add);
-
-        allRoutes.forEach(route -> {
-            route.setDistance(distanceInKilometers(route.getSourceAirportIata(), route.getDestinationAirportIata()));
-            if (route.getDistance() > 0) {
-                edges.add(new Edge(String.valueOf(allRoutes.indexOf(route)),
-                        nodes.stream().filter(s -> s.getName().equals(route.getSourceAirportIata())).findFirst().orElse(null),
-                        nodes.stream().filter(s -> s.getName().equals(route.getDestinationAirportIata())).findFirst().orElse(null),
-                        route.getDistance()));
-            }
-        });
 
         Vertex vertexStart = getVertexByIata(nodes, start);
         Vertex vertexEnd = getVertexByIata(nodes, end);
@@ -56,7 +47,6 @@ public class FlightService {
 
         validateResultPath(path);
         List<Airport> allAirports = airportRepository.getAllAirports();
-        log.info("Returning shortest path");
         return new FlightResponseDto(path, calculateTotalDistance(path), findAlternativePaths(allAirports, end, path));
     }
 
@@ -86,7 +76,7 @@ public class FlightService {
             if (distanceToNeigbours <= 100 && !end.equals(airport.getIATA())) {
                 LinkedList<Vertex> path2 = (LinkedList<Vertex>) path.clone();
                 path2.removeLast();
-                path2.add(new Vertex(airport.getIATA(), airport.getIATA()));
+                path2.add(new Vertex(airport.getIATA()));
                 alternativePaths.put(path2, calculateTotalDistance(path2));
             }
         });
