@@ -2,7 +2,6 @@ package com.sixfold.flight.controller;
 
 
 import com.sixfold.flight.service.FlightService;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +18,10 @@ public class FlightController {
         this.flightService = flightService;
     }
 
-    @PostMapping(value = "get-shortest-path", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "get-shortest-path")
     public ResponseEntity<FlightResponseDto> findAllRelyingPartiesByPlanetId(@RequestBody FlightRequestDto request) {
 
-        FlightResponseDto response = flightService.findShortestRoute(request.getStart(), request.getEnd());
+        FlightResponseDto response = flightService.findShortestRoute(request.getStart().toUpperCase(), request.getEnd().toUpperCase());
         return ResponseEntity.ok(response);
     }
 }

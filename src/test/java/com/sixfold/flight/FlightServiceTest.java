@@ -2,11 +2,12 @@ package com.sixfold.flight;
 
 import com.sixfold.flight.controller.FlightResponseDto;
 import com.sixfold.flight.entity.Airport;
+import com.sixfold.flight.entity.Vertex;
 import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.repository.AirportRepository;
 import com.sixfold.flight.repository.RouteRepository;
+import com.sixfold.flight.service.DistanceService;
 import com.sixfold.flight.service.FlightService;
-import com.sixfold.flight.service.Vertex;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,7 +23,8 @@ public class FlightServiceTest {
     private final AirportRepository airportRepository = mock(AirportRepository.class);
 
     private final RouteRepository routeRepository = mock(RouteRepository.class);
-    private final FlightService flightService = new FlightService(routeRepository, airportRepository);
+    private final DistanceService distanceService = new DistanceService(airportRepository);
+    private final FlightService flightService = new FlightService(routeRepository, airportRepository, distanceService);
 
     @Rule
     public ExpectedException expected = ExpectedException.none();
@@ -51,10 +53,11 @@ public class FlightServiceTest {
     @Test
     public void findShortestPath_success() {
         AirportRepository airportRepository = new AirportRepository();
-        RouteRepository routeRepository = new RouteRepository(airportRepository);
-        FlightService flightService = new FlightService(routeRepository, airportRepository);
+        DistanceService distanceService = new DistanceService(airportRepository);
+        RouteRepository routeRepository = new RouteRepository(distanceService);
+        FlightService flightService = new FlightService(routeRepository, airportRepository, distanceService);
 
-        FlightResponseDto flightResponseDto = flightService.findShortestRoute("TLL", "MAD");
+        FlightResponseDto flightResponseDto = flightService.findShortestRoute("TLL", "RIX");
 
         assertThat(flightResponseDto.getPath()).isNotNull();
     }
@@ -64,8 +67,9 @@ public class FlightServiceTest {
         expected.expect(BusinessException.class);
         expected.expectMessage("Route or airport does not exist");
         AirportRepository airportRepository = new AirportRepository();
-        RouteRepository routeRepository = new RouteRepository(airportRepository);
-        FlightService flightService = new FlightService(routeRepository, airportRepository);
+        DistanceService distanceService = new DistanceService(airportRepository);
+        RouteRepository routeRepository = new RouteRepository(distanceService);
+        FlightService flightService = new FlightService(routeRepository, airportRepository, distanceService);
 
         flightService.findShortestRoute("TLL", "NON");
     }
@@ -75,8 +79,9 @@ public class FlightServiceTest {
         expected.expect(BusinessException.class);
         expected.expectMessage("Route is too long: 6");
         AirportRepository airportRepository = new AirportRepository();
-        RouteRepository routeRepository = new RouteRepository(airportRepository);
-        FlightService flightService = new FlightService(routeRepository, airportRepository);
+        DistanceService distanceService = new DistanceService(airportRepository);
+        RouteRepository routeRepository = new RouteRepository(distanceService);
+        FlightService flightService = new FlightService(routeRepository, airportRepository, distanceService);
 
         flightService.findShortestRoute("TLL", "ACV");
     }

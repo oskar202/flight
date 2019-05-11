@@ -3,7 +3,7 @@ package com.sixfold.flight.controller;
 import lombok.Data;
 
 @Data
-public class FlightRequestDto {
+class FlightRequestDto {
     private String start;
     private String end;
 }

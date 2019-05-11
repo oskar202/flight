@@ -6,7 +6,7 @@ import lombok.Data;
 public class Airport {
     private int airportId;
     private String name;
-    private String IATA;
+    private String iata;
     private double latitude;
     private double longitude;
 }

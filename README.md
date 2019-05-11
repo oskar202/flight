@@ -21,15 +21,12 @@ Prerequierments:
 {
   "path": [
     {
-      "id": "TLL",
       "name": "TLL"
     },
     {
-      "id": "FRA",
       "name": "FRA"
     },
     {
-      "id": "MAD",
       "name": "MAD"
     }
   ],
@@ -40,4 +37,4 @@ Prerequierments:
   }
 }
 ```
-Alternative routes have different final airport within 100 km.
+Alternative paths have different final airport within 100 km.

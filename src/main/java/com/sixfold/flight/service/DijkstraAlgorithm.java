@@ -1,8 +1,12 @@
 package com.sixfold.flight.service;
 
-import com.sixfold.flight.repository.AirportRepository;
+import com.sixfold.flight.entity.Edge;
+import com.sixfold.flight.entity.Graph;
+import com.sixfold.flight.entity.Vertex;
 
 import java.util.*;
+
+import static java.util.Objects.requireNonNullElse;
 
 class DijkstraAlgorithm {
     private final List<Edge> edges;
@@ -15,44 +19,42 @@ class DijkstraAlgorithm {
         this.edges = new ArrayList<>(graph.getEdges());
     }
 
-    void execute(Vertex source) {
+    void execute(Vertex source, Vertex destination) {
         settledNodes = new HashSet<>();
         unSettledNodes = new HashSet<>();
         distance = new HashMap<>();
         predecessors = new HashMap<>();
         distance.put(source, 0d);
         unSettledNodes.add(source);
-        while (!unSettledNodes.isEmpty()) {
-            Vertex node = getMinimum(unSettledNodes);
-            settledNodes.add(node);
-            unSettledNodes.remove(node);
-            findMinimalDistances(node);
+
+        Optional<Edge> directRoute = edges.stream().filter(s -> s.getSource().equals(source)).filter(d -> d.getDestination().equals(destination)).findFirst();
+        if (directRoute.isPresent()) {
+            findShortestRoute();
+        } else {
+            while (!unSettledNodes.isEmpty()) {
+                findShortestRoute();
+            }
         }
     }
 
-    private void findMinimalDistances(Vertex node) {
-        Map<Vertex, Double> adjacentNodes = getNeighbors(node);
-        adjacentNodes.forEach((target, weight) -> {
-            if (weight > 0) {
-                double newDistance = getShortestDistance(node) + weight;
-                if (getShortestDistance(target) > newDistance) {
-                    distance.put(target, newDistance);
-                    predecessors.put(target, node);
-                    unSettledNodes.add(target);
+    private void findShortestRoute() {
+        Vertex node = getMinimum(unSettledNodes);
+        settledNodes.add(node);
+        unSettledNodes.remove(node);
+        getNeighbors(node);
+    }
+
+    private void getNeighbors(Vertex node) {
+        for (Edge edge : edges) {
+            if (edge.getSource().equals(node) && !settledNodes.contains((edge.getDestination())) && edge.getWeight() > 0) {
+                double newDistance = getShortestDistance(node) + edge.getWeight();
+                if (getShortestDistance(edge.getDestination()) > newDistance) {
+                    distance.put(edge.getDestination(), newDistance);
+                    predecessors.put(edge.getDestination(), node);
+                    unSettledNodes.add(edge.getDestination());
                 }
             }
-        });
-    }
-
-    private Map<Vertex, Double> getNeighbors(Vertex node) {
-        Map<Vertex, Double> list = new HashMap<>();
-        for (Edge edge : edges) {
-            if (edge.getSource().equals(node) && !isSettled(edge.getDestination())) {
-                Vertex destination = edge.getDestination();
-                list.put(destination, edge.getWeight());
-            }
         }
-        return list;
     }
 
     private Vertex getMinimum(Set<Vertex> vertexes) {
@@ -65,12 +67,8 @@ class DijkstraAlgorithm {
         return minimum;
     }
 
-    private boolean isSettled(Vertex vertex) {
-        return settledNodes.contains(vertex);
-    }
-
     private double getShortestDistance(Vertex destination) {
-        return Objects.requireNonNullElse(distance.get(destination), Double.MAX_VALUE);
+        return requireNonNullElse(distance.get(destination), Double.MAX_VALUE);
     }
 
     LinkedList<Vertex> getPath(Vertex step) {

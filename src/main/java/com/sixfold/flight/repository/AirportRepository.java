@@ -30,7 +30,7 @@ public class AirportRepository {
                 Airport airport = new Airport();
                 String[] splitted = x.replaceAll("\\\\N", "0").split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
                 airport.setName(splitted[1]);
-                airport.setIATA(splitted[4].replaceAll("\"", ""));
+                airport.setIata(splitted[4].replaceAll("\"", ""));
                 airport.setLatitude(parseDouble(splitted[6]));
                 airport.setLongitude(parseDouble(splitted[7]));
 
@@ -42,7 +42,7 @@ public class AirportRepository {
     }
 
     public Airport getAirportByIata(String iata) {
-        return database.values().stream().filter(a -> a.getIATA().equals(iata)).findFirst().orElse(null);
+        return database.values().stream().filter(a -> a.getIata().equals(iata)).findFirst().orElse(null);
     }
 
     public List<Airport> getAllAirports() {

@@ -2,6 +2,9 @@ package com.sixfold.flight.service;
 
 import com.sixfold.flight.controller.FlightResponseDto;
 import com.sixfold.flight.entity.Airport;
+import com.sixfold.flight.entity.Edge;
+import com.sixfold.flight.entity.Graph;
+import com.sixfold.flight.entity.Vertex;
 import com.sixfold.flight.exception.BusinessException;
 import com.sixfold.flight.repository.AirportRepository;
 import com.sixfold.flight.repository.RouteRepository;
@@ -17,14 +20,16 @@ import java.util.stream.IntStream;
 public class FlightService {
     private RouteRepository routeRepository;
     private AirportRepository airportRepository;
+    private DistanceService distanceService;
 
-    public FlightService(RouteRepository routeRepository, AirportRepository airportRepository) {
+    public FlightService(RouteRepository routeRepository, AirportRepository airportRepository, DistanceService distanceService) {
         this.routeRepository = routeRepository;
         this.airportRepository = airportRepository;
+        this.distanceService = distanceService;
     }
 
     public FlightResponseDto findShortestRoute(String start, String end) {
-        List<Edge> edges = routeRepository.getAllRoutes(start);
+        List<Edge> edges = routeRepository.getAllRoutes();
         List<Vertex> nodes = new ArrayList<>();
 
         Set<Vertex> destination = edges.stream()
@@ -42,11 +47,12 @@ public class FlightService {
         Graph graph = new Graph(nodes, edges);
         DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph);
         log.info("Executing dijkstra algorithm");
-        dijkstra.execute(vertexStart);
+        dijkstra.execute(vertexStart, vertexEnd);
         LinkedList<Vertex> path = dijkstra.getPath(vertexEnd);
 
         validateResultPath(path);
         List<Airport> allAirports = airportRepository.getAllAirports();
+        log.info("Finished calculating shortest route");
         return new FlightResponseDto(path, calculateTotalDistance(path), findAlternativePaths(allAirports, end, path));
     }
 
@@ -62,9 +68,9 @@ public class FlightService {
         }
     }
 
-    public double calculateTotalDistance(LinkedList<Vertex> path) {
+    public double calculateTotalDistance(List<Vertex> path) {
         return IntStream.range(0, path.size() - 1)
-                .mapToDouble(p -> distanceInKilometers(path.get(p).getName(), path.get(p + 1).getName()))
+                .mapToDouble(p -> distanceService.distanceInKilometers(path.get(p).getName(), path.get(p + 1).getName()))
                 .sum();
     }
 
@@ -72,42 +78,14 @@ public class FlightService {
         Map<LinkedList<Vertex>, Double> alternativePaths = new HashMap<>();
 
         allAirports.forEach(airport -> {
-            double distanceToNeigbours = distanceInKilometers(end, airport.getIATA());
-            if (distanceToNeigbours <= 100 && !end.equals(airport.getIATA())) {
+            double distanceToNeigbours = distanceService.distanceInKilometers(end, airport.getIata());
+            if (distanceToNeigbours <= 100 && !end.equals(airport.getIata())) {
                 LinkedList<Vertex> path2 = (LinkedList<Vertex>) path.clone();
                 path2.removeLast();
-                path2.add(new Vertex(airport.getIATA()));
+                path2.add(new Vertex(airport.getIata()));
                 alternativePaths.put(path2, calculateTotalDistance(path2));
             }
         });
         return alternativePaths;
     }
-
-    private double distanceInKilometers(String start, String end) {
-        Airport departure = airportRepository.getAirportByIata(start);
-        Airport destination = airportRepository.getAirportByIata(end);
-        if (departure == null || destination == null)
-            return 0;
-        double lat1 = departure.getLatitude();
-        double lon1 = departure.getLongitude();
-        double lat2 = destination.getLatitude();
-        double lon2 = destination.getLongitude();
-
-        double theta = lon1 - lon2;
-        double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
-        dist = Math.acos(dist);
-        dist = rad2deg(dist);
-        double distanceInNauticalMile = dist * 60;
-
-        return distanceInNauticalMile * 1.852;
-    }
-
-    private double deg2rad(double deg) {
-        return (deg * Math.PI / 180.0);
-    }
-
-    private double rad2deg(double rad) {
-        return (rad * 180.0 / Math.PI);
-    }
-
 }
