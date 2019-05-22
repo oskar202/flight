@@ -19,7 +19,7 @@ public class FlightController {
     }
 
     @PostMapping(value = "get-shortest-path")
-    public ResponseEntity<FlightResponseDto> findAllRelyingPartiesByPlanetId(@RequestBody FlightRequestDto request) {
+    public ResponseEntity<FlightResponseDto> findShortestRoute(@RequestBody FlightRequestDto request) {
 
         FlightResponseDto response = flightService.findShortestRoute(request.getStart().toUpperCase(), request.getEnd().toUpperCase());
         return ResponseEntity.ok(response);

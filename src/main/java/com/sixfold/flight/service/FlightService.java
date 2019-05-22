@@ -63,7 +63,7 @@ public class FlightService {
     private void validateResultPath(LinkedList<Vertex> path) {
         if (path.isEmpty()) {
             throw new BusinessException("Route or airport does not exist");
-        } else if (path.size() > 4) {
+        } else if (path.size() >= 4) {
             throw new BusinessException("Route is too long: " + path.size());
         }
     }
